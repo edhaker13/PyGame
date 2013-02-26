@@ -37,7 +37,7 @@ def draw_bg():
     
 def draw_menu():
     window.blit(menu,(0,0))
-    draw_msg('Guess or die trying!', menu)
+    draw_msg('Guess or die trying!')
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -51,7 +51,7 @@ def draw_menu():
     fps.tick(30)
     pygame.display.update()
     
-def draw_msg(msg, bg):
+def draw_msg(msg):
     msgSurface = font.render(msg, True, red)
     msgRect = msgSurface.get_rect()
     msgRect.topleft = (10,5)
@@ -90,13 +90,13 @@ def draw_word(secretWord, correct):
 
 def check_guess(guess, alreadyGuessed):
     if len(guess) != 1:
-        draw_msg('Please guess a letter'. bg)
+        draw_msg('Please guess a single letter')
     elif guess in alreadyGuessed:
-        draw_msg('You have already guessed that letter. Choose again.', bg)
+        draw_msg('You have already guessed that letter. Choose again.')
     elif guess not in 'abcdefghijklmnopqrstuvwxyz':
-        draw_msg('Please enter a LETTER.', bg)
+        draw_msg('Please enter a LETTER.')
     else:
-        draw_msg('Please guess another letter', bg)
+        draw_msg('Please guess another letter')
         pygame.time.delay(50)
         return guess
     
@@ -114,7 +114,7 @@ def is_correct(guess,correct):
             if secretWord[i] not in correct:
                 foundAllLetters = False
         if foundAllLetters:
-            draw_msg('Yes! The secret word is "' + secretWord + '"! You have won!', bg)
+            draw_msg('Yes! You won!')
             gameIsDone = True
         
     else:
@@ -123,10 +123,11 @@ def is_correct(guess,correct):
         draw_wrong(missed)
         # Check if player has guessed too many times and lost
         if len(missed) == 6:
-            draw_msg('You have run out of guesses!', bg)
+            draw_msg('You have run out of guesses!')
             gameIsDone = True
         
 def display_board(missed, correct, secretWord):
+    draw_msg('Guess a letter!')
     draw_wrong(missed)
     draw_word(secretWord, correct)
     
