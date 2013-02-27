@@ -93,22 +93,45 @@ def draw_man():
     global missed, rect_list
     parts = len(missed)
     if parts == 1:
-        head = pygame.draw.circle(window, white, (430, 170), 30)
-        pygame.draw.aaline(window,black,(415,180),(445,155))
-        pygame.draw.aaline(window,black,(415,155),(445,180))
+        x,y = 430, 170
+        head = pygame.draw.circle(window, white, (x, y), 30)
+        pygame.draw.aaline(window,black,(x-15,y+12),(x+15,y-12))
+        pygame.draw.aaline(window,black,(x-15,y-12),(x+15,y+12))
         rect_list.append(head)
-    elif parts == 2:
-        points = [(415,195),(395,330),(470,330),(445,195)]
+    if parts >= 2:
+        x,y = 430, 330
+        points = [(x-15,y-135),(x-35,y),(x+35,y),(x+15,y-135)]
         body = pygame.draw.polygon(window,white,points)
         rect_list.append(body)
-    elif parts == 3:
-        points = [(412,210),(372,300),(407,265)]
+    if parts >= 3:
+        x,y = 372, 300
+        points = [(x+40,y-90),(x,y),(x+35,y-35)]
         arm = pygame.draw.polygon(window,white,points)
         rect_list.append(arm)
-    elif parts == 4:
-        points = [(447,210),(477,300),(452,265)]
+    if parts >= 4:
+        x,y = 485, 300
+        points = [(x-40,y-90),(x,y),(x-35,y-35)]
         arm1 = pygame.draw.polygon(window,white,points)
         rect_list.append(arm1)
+    if parts == 5:
+        x,y = 440, 380
+        points = [(x-5,y+5),(x+10,y+5),(x+5,y-50),(x-5,y-50)]
+        leg = pygame.draw.polygon(window,white,points)
+        rect_list.append(leg)
+        
+        points = [x,y,20,15]
+        foot = pygame.draw.ellipse(window,white,points)
+        rect_list.append(foot)
+    if parts == 6:
+        x,y = 370, 380
+        points = [(x-5,y+5),(x+10,y+5),(x+5,y-50),(x-5,y-50)]
+        leg = pygame.draw.polygon(window,white,points)
+        rect_list.append(leg)
+        
+        points = [x,y,20,15]
+        foot = pygame.draw.ellipse(window,white,points)
+        draw_msg('You have run out of guesses!')
+        rect_list.append(foot)
 def is_correct():
     global guess, correct, secretWord, gameIsDone
     if guess in secretWord:
@@ -129,9 +152,9 @@ def is_correct():
         draw_wrong()
         draw_man()
         # Check if player has guessed too many times and lost
-        if len(missed) == 6:
-            draw_msg('You have run out of guesses!')
-            gameIsDone = True
+        #if len(missed) == 6:
+            
+            #gameIsDone = True
 
 def check_guess(guess, alreadyGuessed):
     if len(guess) != 1:
