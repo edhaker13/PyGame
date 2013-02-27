@@ -4,7 +4,7 @@ Created on 25 Feb 2013
 @author: Luis Checa
 '''
 import pygame , sys
-from pygame.locals import QUIT, KEYDOWN, K_ESCAPE,K_a
+from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 # it starts!
 pygame.init()
 # Set Clock FPS
@@ -19,17 +19,16 @@ menu = pygame.image.load('hangman.jpg').convert()
 # Assign colour names for ease of use
 red = pygame.Color(255,0,0)
 green = pygame.Color(0,255,0)
-#blue = pygame.Color(0,0,255)
-#black = pygame.Color(0,0,0)
-#white = pygame.Color(255,255,255)
+blue = pygame.Color(0,0,255)
+black = pygame.Color(0,0,0)
+white = pygame.Color(255,255,255)
 font = pygame.font.SysFont('calibri', 30)
 missed = ''
 correct = ''
 warning = 'Guess a letter.'
-secretWord = 'happy birthday'
+secretWord = 'birthday'
 gameIsDone = False
 rect_list = []
-is_valid = False
 
 def draw_bg():
     window.blit(bg, (0,0))
@@ -38,44 +37,46 @@ def draw_bg():
 def draw_menu():
     window.blit(menu,(0,0))
     draw_msg('Guess or die trying!')
+    fps.tick(30)
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
                 
-        elif event.type == KEYDOWN:
+        if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 pygame.event.post(pygame.event.Event(QUIT))
-            if event.key == K_a:
-                return
-    fps.tick(30)
+        return
     pygame.display.update()
     
 def draw_msg(msg):
-    msgSurface = font.render(msg, True, red)
+    msgSurface = font.render(msg, True, white)
     msgRect = msgSurface.get_rect()
     msgRect.topleft = (10,5)
-    window.blit(bg,msgRect.topleft,msgRect)
+    maxRect = (0,0,600,30)
+    window.blit(bg, maxRect)
     window.blit(msgSurface, msgRect)
     global rect_list
-    rect_list.append(msgRect)
+    rect_list.append(maxRect)
     
-def draw_font(guess, pos):
-    Surface = font.render(guess, True, green)
+def draw_font(msg, pos, color=green):
+    Surface = font.render(msg, True, color)
     Rect = Surface.get_rect()
     Rect.topleft = pos
     window.blit(Surface, Rect)
     return Rect
  
-def draw_wrong(missed):
-    msg = 'Missed letters:'
+def draw_wrong():
+    global missed
+    msg = 'Missed letters: '
     for letter in missed:
-        msg += letter + ", "
-    Rect = draw_font(msg, (50, 35))
+        msg += letter.upper() + ", "
+    Rect = draw_font(msg, (50, 35), red)
     global rect_list
     rect_list.append(Rect)
 
-def draw_word(secretWord, correct):
+def draw_right():
+    global correct, secretWord
     blanks = '_' * len(secretWord)
 
     for i in range(len(secretWord)): # replace blanks with correctly guessed letters
@@ -84,30 +85,35 @@ def draw_word(secretWord, correct):
     toguess= ''
     for letter in blanks: # show the secret word with spaces in between each letter
         toguess += letter
-    Rect = draw_font(toguess, (50, 80))
+    Rect = draw_font(toguess.upper(), (50, 80))
     global rect_list
     rect_list.append(Rect)
 
-def check_guess(guess, alreadyGuessed):
-    if len(guess) != 1:
-        draw_msg('Please guess a single letter')
-    elif guess in alreadyGuessed:
-        draw_msg('You have already guessed that letter. Choose again.')
-    elif guess not in 'abcdefghijklmnopqrstuvwxyz':
-        draw_msg('Please enter a LETTER.')
-    else:
-        draw_msg('Please guess another letter')
-        pygame.time.delay(50)
-        return guess
-    
-    guess = ''
-    get_input()
-    return guess
-
-def is_correct(guess,correct):
+def draw_man():
+    global missed, rect_list
+    parts = len(missed)
+    if parts == 1:
+        head = pygame.draw.circle(window, white, (430, 170), 30)
+        pygame.draw.aaline(window,black,(415,180),(445,155))
+        pygame.draw.aaline(window,black,(415,155),(445,180))
+        rect_list.append(head)
+    elif parts == 2:
+        points = [(415,195),(395,330),(470,330),(445,195)]
+        body = pygame.draw.polygon(window,white,points)
+        rect_list.append(body)
+    elif parts == 3:
+        points = [(412,210),(372,300),(407,265)]
+        arm = pygame.draw.polygon(window,white,points)
+        rect_list.append(arm)
+    elif parts == 4:
+        points = [(447,210),(477,300),(452,265)]
+        arm1 = pygame.draw.polygon(window,white,points)
+        rect_list.append(arm1)
+def is_correct():
+    global guess, correct, secretWord, gameIsDone
     if guess in secretWord:
         correct = correct + guess
-        draw_word(secretWord, correct)
+        draw_right()
         # Check if the player has won
         foundAllLetters = True
         for i in range(len(secretWord)):
@@ -120,19 +126,33 @@ def is_correct(guess,correct):
     else:
         global missed
         missed = missed + guess
-        draw_wrong(missed)
+        draw_wrong()
+        draw_man()
         # Check if player has guessed too many times and lost
         if len(missed) == 6:
             draw_msg('You have run out of guesses!')
             gameIsDone = True
-        
-def display_board(missed, correct, secretWord):
-    draw_msg('Guess a letter!')
-    draw_wrong(missed)
-    draw_word(secretWord, correct)
+
+def check_guess(guess, alreadyGuessed):
+    if len(guess) != 1:
+        draw_msg('Guess a single letter')
+    elif guess in alreadyGuessed:
+        draw_msg('Already guessed that letter, Try again.')
+    elif guess not in 'abcdefghijklmnopqrstuvwxyz':
+        draw_msg('Enter a LETTER.')
+    else:
+        draw_msg('Guess another letter')
+        pygame.time.delay(50)
+        return guess
+    
+    guess = ''
+    get_input()
+    return guess   
     
 draw_bg()
-display_board(missed, correct, secretWord)
+draw_msg('Guess a letter!')
+draw_wrong()
+draw_right()
 pygame.display.update(rect_list)
 fps.tick(30)
   
@@ -153,6 +173,6 @@ def get_input():
 while not gameIsDone:
     rect_list = []
     guess = get_input()
-    is_correct(guess, correct)
+    is_correct()
     pygame.display.update(rect_list)
     
